@@ -45,10 +45,6 @@ export const POST = async (req: NextRequest) => {
       generateVerificationEmail(name, otp)
     );
 
-    const response = NextResponse.json({
-      message: "Account created need to verify, OTP valid for 10 mints.",
-    });
-
     // Create New User
     const user = new User({
       name,
@@ -61,11 +57,16 @@ export const POST = async (req: NextRequest) => {
       email: user.email,
     });
 
+    const response = NextResponse.json({
+      message: "Account created need to verify, OTP valid for 10 mints.",
+      token: verifyUserToken,
+    });
+
     response.headers.set(
       "Set-Cookie",
-      `verify-user=${verifyUserToken}; HttpOnly; Path=/; Max-Age=${
+      `verify-token=${verifyUserToken}; HttpOnly; Path=/; Max-Age=${
         10 * 60
-      }; Secure`
+      }; Secure; SameSite=None`
     );
 
     console.log("Done");

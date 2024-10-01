@@ -14,8 +14,9 @@ export const POST = async (req: NextRequest) => {
   try {
     await dbConnect();
 
-    const { otp } = await req.json();
-    const token = req.cookies.get("verify-user");
+    const { otp, token } = await req.json();
+
+    console.log(token, otp);
 
     if (!token || !otp) {
       return NextResponse.json(
@@ -24,9 +25,7 @@ export const POST = async (req: NextRequest) => {
       );
     }
 
-    const verifyUser = (await decodeVerifyToken(
-      token.value
-    )) as UserEmailPayload;
+    const verifyUser = (await decodeVerifyToken(token)) as UserEmailPayload;
 
     const user = await User.findOne({ email: verifyUser.email }).collation({
       locale: "en",
@@ -62,7 +61,7 @@ export const PUT = async (req: NextRequest) => {
   try {
     await dbConnect();
 
-    const token = req.cookies.get("verify-user");
+    const token = req.cookies.get("verify-token");
 
     if (!token) {
       return NextResponse.json(
