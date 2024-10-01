@@ -83,7 +83,7 @@ export const POST = async (req: NextRequest) => {
       email: user.email,
     });
 
-    const resetLink = `${process.env.APP_BASE_URL}/auth/login/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.APP_BASE_URL}/change-pass/index.html?token=${resetToken}`;
     await sendEmail(
       user.email,
       "Password Reset Request",
@@ -108,8 +108,9 @@ export const PUT = async (req: NextRequest) => {
   try {
     await dbConnect();
 
-    const { password } = await req.json();
-    const token = req.cookies.get("reset-token");
+    const { password, token } = await req.json();
+
+    console.log(token);
 
     if (!token) {
       return NextResponse.json(
@@ -117,7 +118,7 @@ export const PUT = async (req: NextRequest) => {
         { status: 400 }
       );
     }
-    const payload = (await decodeVerifyToken(token.value)) as UserEmailPayload;
+    const payload = (await decodeVerifyToken(token)) as UserEmailPayload;
     const email = payload.email;
 
     const user = await User.findOne({ email: email });
