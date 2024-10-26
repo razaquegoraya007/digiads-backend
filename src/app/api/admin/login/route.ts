@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateAdminToken } from "../../../../libs/authUtils";
 
 export const POST = async (req: NextRequest) => {
-  const { password } = await req.json();
+  const { password, username } = await req.json();
 
   if (!password) {
     return NextResponse.json(
@@ -12,16 +12,17 @@ export const POST = async (req: NextRequest) => {
   }
 
   if (
-    process.env.ADMIN_PASSWORD === password
+    process.env.ADMIN_PASSWORD === password &&
+    process.env.ADMIN_USERNAME === username
   ) {
-    const token = await generateAdminToken({ id: "", isAdmin: true });
+    const token = await generateAdminToken({ id: "", isAdmin: false });
 
     const response = NextResponse.json({
       message: "Admin Login Successfully.",
     });
     response.headers.set(
       "Set-Cookie",
-      `user-token=${token}; HttpOnly; Path=/; Max-Age=${12 * 60 * 60}; Secure`
+      `user-token=${token}; HttpOnly; Path=/; Max-Age=${12 * 60 * 60};`
     );
 
     return response;
@@ -29,5 +30,3 @@ export const POST = async (req: NextRequest) => {
 
   return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
 };
-
-

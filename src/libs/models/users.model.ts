@@ -15,10 +15,6 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    messageLimit: {
-      type: Number,
-      default: 0,
-    },
   },
   {
     timestamps: true,

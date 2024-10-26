@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { NextResponse, NextRequest } from "next/server";
 import User from "../../../../libs/models/users.model";
 import { generateUserToken } from "../../../../libs/authUtils";
@@ -89,11 +90,12 @@ export const POST = async (request: NextRequest) => {
       const verifyUserToken = await generateUserToken({
         email: email,
       });
+
       response.headers.set(
         "Set-Cookie",
         `verify-user=${verifyUserToken}; HttpOnly; Path=/; Max-Age=${
           10 * 60
-        }; Secure`
+        }; SameSite=None`
       );
       return response;
     }
@@ -105,7 +107,9 @@ export const POST = async (request: NextRequest) => {
     });
     response.headers.set(
       "Set-Cookie",
-      `user-token=${token}; HttpOnly; Path=/; Max-Age=${12 * 60 * 60}; Secure`
+      `user-token=${token}; SameSite=None; Secure; Path=/; Max-Age=${
+        12 * 60 * 60
+      };`
     );
 
     return response;

@@ -23,15 +23,27 @@ export default async function middleware(req: NextRequest) {
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization"
   );
+  response.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, application/json"
+  );
   response.headers.set("Access-Control-Allow-Credentials", "true");
 
+  if (!pathname.startsWith("/api")) {
+    return response;
+  }
+
+  console.log("All Cookies: ", req.cookies);
+
   // Paths that require middleware intervention
-  const pathsToCheck = ["/api/user/", "/api/admin/", "/admin/", "/user/"];
+  const pathsToCheck = ["/api/user/", "/api/admin/"];
 
   // Check if the current pathname starts with any of the paths in pathsToCheck
   const isProtectedRoute = pathsToCheck.some((path) =>
     pathname.startsWith(path)
   );
+
+  console.log("Protected Route", isProtectedRoute);
 
   // If the path is not in the protected routes, skip middleware processing
   if (!isProtectedRoute) {
@@ -41,19 +53,25 @@ export default async function middleware(req: NextRequest) {
   // Extract token from the cookie
   const token = req.cookies.get("user-token");
 
+  const isAdminUrl =
+    pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+
+  if (isAdminUrl && pathname.startsWith("/api/admin/login")) {
+    return response;
+  }
+
+  console.log("TOKEN: ", token.value, "PATH", pathname);
+
   // Check if the token is not available
   if (!token) {
     return NextResponse.redirect(new URL("/auth/login", req.url));
   }
 
-  const isAdminUrl =
-    pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
-
   try {
     // Decode the token using a function that you expect to resolve to a payload containing `id` and `isAdmin`
     const { id, isAdmin } = (await decodeToken(
-      token,
-      isAdminUrl
+      token.value,
+      false
     )) as TokenPayload;
     console.log(id, isAdmin);
 
@@ -64,6 +82,7 @@ export default async function middleware(req: NextRequest) {
 
       return response;
     } else {
+      console.log("HERE REDIRECTING");
       return NextResponse.redirect(new URL("/auth/login", req.url));
     }
   } catch (error) {
