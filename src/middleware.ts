@@ -14,20 +14,6 @@ export default async function middleware(req: NextRequest) {
 
   // Manually set CORS headers
   const response = NextResponse.next();
-  response.headers.set("Access-Control-Allow-Origin", "*"); // Be more specific in production environments
-  response.headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-  );
-  response.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization"
-  );
-  response.headers.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, application/json"
-  );
-  response.headers.set("Access-Control-Allow-Credentials", "true");
 
   if (!pathname.startsWith("/api")) {
     return response;
@@ -60,14 +46,21 @@ export default async function middleware(req: NextRequest) {
     return response;
   }
 
-  console.log("TOKEN: ", token.value, "PATH", pathname);
-
   // Check if the token is not available
   if (!token) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    return NextResponse.json(
+      {
+        error: "Unauthorized user",
+      },
+      { status: 403 }
+    );
   }
+  console.log("TOKEN: ", token.value, "PATH", pathname);
 
   try {
+    const r = (await decodeToken(token.value, false)) as TokenPayload;
+    console.log("[DECODE MIDDLEWARE]", r);
+
     // Decode the token using a function that you expect to resolve to a payload containing `id` and `isAdmin`
     const { id, isAdmin } = (await decodeToken(
       token.value,
@@ -78,15 +71,25 @@ export default async function middleware(req: NextRequest) {
     // Check if the id exists and is decoded properly
     if (id || isAdmin) {
       response.headers.set("x-user-id", id);
-      response.headers.set("x-is-admin", isAdmin ? "true" : "false");
+      response.headers.set("x-is-admin", "false");
 
       return response;
     } else {
       console.log("HERE REDIRECTING");
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      return NextResponse.json(
+        {
+          error: "Unauthorized user",
+        },
+        { status: 403 }
+      );
     }
   } catch (error) {
     console.error("Error decoding token:", error);
-    return NextResponse.redirect(new URL("/auth/login", req.url));
+    return NextResponse.json(
+      {
+        error: "Unauthorized user",
+      },
+      { status: 403 }
+    );
   }
 }

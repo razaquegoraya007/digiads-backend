@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateAdminToken } from "../../../../libs/authUtils";
+import { decodeToken, generateAdminToken } from "../../../../libs/authUtils";
 
 export const POST = async (req: NextRequest) => {
   const { password, username } = await req.json();
@@ -15,7 +15,13 @@ export const POST = async (req: NextRequest) => {
     process.env.ADMIN_PASSWORD === password &&
     process.env.ADMIN_USERNAME === username
   ) {
-    const token = await generateAdminToken({ id: "", isAdmin: false });
+    const token = await generateAdminToken({ id: "xxxx", isAdmin: false });
+
+    console.log("[TOKEN]", token);
+
+    const r = await decodeToken(token, false);
+
+    console.log("[DECODE]", r);
 
     const response = NextResponse.json({
       message: "Admin Login Successfully.",
