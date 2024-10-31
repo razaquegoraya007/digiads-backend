@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decodeToken } from "./libs/authUtils";
+import { corsHeaders } from "./app/api/_utils";
 
 interface TokenPayload {
   id: string;
@@ -11,6 +12,10 @@ export default async function middleware(req: NextRequest) {
 
   console.log("Middleware Triggered");
   console.log("Request Path", pathname);
+
+  if (req.method == "OPTIONS") {
+    return NextResponse.json({}, { status: 200, headers: corsHeaders });
+  }
 
   // Manually set CORS headers
   const response = NextResponse.next();
