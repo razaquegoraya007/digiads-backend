@@ -27,7 +27,7 @@ export const generateUserToken = async (user) => {
  * @returns {Promise<string>} The generated JWT.
  */
 export const generateAdminToken = async (admin) => {
-  const secret = new TextEncoder().encode(process.env.ADMIN_TOKEN_SECRET);
+  const secret = new TextEncoder().encode(process.env.USER_TOKEN_SECRET);
   const jwt = await new jose.SignJWT(admin)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -44,9 +44,7 @@ export const generateAdminToken = async (admin) => {
  */
 export const decodeToken = async (token, isAdmin = false) => {
   try {
-    const secret = new TextEncoder().encode(
-      isAdmin ? process.env.ADMIN_TOKEN_SECRET : process.env.USER_TOKEN_SECRET
-    );
+    const secret = new TextEncoder().encode(process.env.USER_TOKEN_SECRET);
 
     const { payload } = await jose.jwtVerify(token, secret);
     return {
@@ -84,7 +82,7 @@ export const decodeVerifyToken = async (token) => {
  * @returns {Promise<{id: string, isAdmin: boolean} | null>} The decoded payload.
  */
 export const adminAuthentication = (token) => {
-  return decodeToken(token, true);
+  return decodeToken(token, false);
 };
 
 /**

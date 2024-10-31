@@ -7,8 +7,31 @@ import { dbConnect } from "../../../../libs/services/mongoose";
 import { sendEmail } from "../../../../libs/services/mailer";
 import { generateVerificationEmail } from "../../../../libs/const";
 import { generateOTP } from "../../../../libs/utils";
+import { corsHeaders } from "../../_utils";
 
-export const POST = async (request: NextRequest) => {
+export async function OPTIONS(req: NextRequest) {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+/*
+export const POST = async (request: NextRequest, response: NextResponse) => {
+  const input = await request.json();
+  console.log("[Login:Input] -", input);
+  return Response.json(
+    { message: "Hello World" },
+    {
+      status: 200,
+      headers: {
+        "Set-Cookie":
+          "test-token=123123; Max-Age=604800; Path=/; HttpOnly; SameSite=None; Secure",
+        ...corsHeaders,
+      },
+    }
+  );
+};
+*/
+
+export const POST = async (request: NextRequest, res: NextResponse) => {
   try {
     await dbConnect();
 
@@ -102,17 +125,19 @@ export const POST = async (request: NextRequest) => {
 
     const token = await generateUserToken({ id: user.id, isAdmin: false });
 
-    const response = NextResponse.json({
-      message: "Login Successfully.",
-    });
-    response.headers.set(
-      "Set-Cookie",
-      `user-token=${token}; SameSite=None; Secure; Path=/; Max-Age=${
-        12 * 60 * 60
-      };`
+    console.log("Login Successful");
+    return Response.json(
+      { message: "Login Successfully." },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": `user-token=${token}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=${
+            12 * 60 * 60
+          };`,
+          ...corsHeaders,
+        },
+      }
     );
-
-    return response;
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

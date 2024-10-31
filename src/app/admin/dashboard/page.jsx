@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Button, Box, Typography } from "@mui/material";
 import AddLocationDialog from "./_components/AddLocationDialog";
 import LocationTable from "./_components/LocationTable";
+import CampaignTable from "./_components/CampaignTable";
 
 const Dashboard = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -25,6 +26,7 @@ const Dashboard = () => {
         Add New Location
       </Button>
       <LocationTable />
+      <CampaignTable />
       <AddLocationDialog open={openDialog} onClose={handleCloseDialog} />
     </Box>
   );

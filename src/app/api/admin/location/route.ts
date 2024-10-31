@@ -47,6 +47,8 @@ export const GET = async () => {
 
   try {
     const locations = await Location.find({});
+    console.log(locations);
+
     return NextResponse.json(locations);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
