@@ -9,9 +9,9 @@ import { generateVerificationEmail } from "../../../../libs/const";
 import { generateOTP } from "../../../../libs/utils";
 import { corsHeaders } from "../../_utils";
 
-export async function OPTIONS(req: NextRequest) {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
+// export async function OPTIONS(req: NextRequest) {
+//   return NextResponse.json({}, { headers: corsHeaders });
+// }
 
 /*
 export const POST = async (request: NextRequest, response: NextResponse) => {
